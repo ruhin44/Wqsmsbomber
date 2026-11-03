@@ -11,11 +11,11 @@ from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
 bot = telebot.TeleBot(TOKEN)
 
-# ── আপনার অ্যাডমিন চ্যাট আইডি এখানে বসিয়ে দিন ──
-ADMIN_CHAT_ID = 8087857994  # <--- আপনার টেলিগ্রাম চ্যাট আইডি এখানে দিন
+# ── আপনার অ্যাডমিন চ্যাট আইডি ──
+ADMIN_CHAT_ID = 8087857994
 
-# রিয়্যাল-টাইম ইউজার ট্র্যাকিং ডিকশনারি
-active_users_stats = {}
+# ইউজার ক্রেডিট ডাটাবেজ
+user_credits = {}
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
 app = Flask(__name__)
@@ -197,16 +197,27 @@ class Bomber:
     return False
 
   def start(self):
-    if self.chat_id in active_users_stats:
-      active_users_stats[self.chat_id] += 1
-    else:
-      active_users_stats[self.chat_id] = 1
+    # চেক করা యూজারর ১ ক্রেডিট আছে কি না
+    current_credits = user_credits.get(self.chat_id, 0)
+    if current_credits < 1:
+      bot.send_message(
+          self.chat_id,
+          "❌ **পর্যাপ্ত ক্রেডিট নেই!**\nবম্বিং শুরু করতে কমপক্ষে **১ ক্রেডিট**"
+          " প্রয়োজন।\nদয়া করে অ্যাডমিনের কাছ থেকে ক্রেডিট রিচার্জ করুন।",
+          parse_mode="Markdown",
+      )
+      return
+
+    # একবার হিট বা টাস্ক শুরু করার জন্য মাত্র ১ ক্রেডিট কেটে নেওয়া হচ্ছে
+    user_credits[self.chat_id] -= 1
 
     counter = 0
     bot.send_message(
         self.chat_id,
         f"🚀 **Target:** `{self.user_mobile}`\n📊 **Count:**"
-        f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**",
+        f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**\n💳"
+        f" কেটে নেওয়া হয়েছে: `1` ক্রেডিট (বাকি: `{user_credits[self.chat_id]}`"
+        " ক্রেডিট)",
         parse_mode="Markdown",
     )
     methods = [
@@ -245,25 +256,73 @@ class Bomber:
     )
 
 
-# অ্যাডমিন কমান্ড: /user
+# ── অ্যাডমিন কমান্ড: ক্রেডিট দেওয়ার জন্য ──
+# ব্যবহার: /add <chat_id> <amount>
+@bot.message_handler(commands=["add"])
+def admin_add_credit(message):
+  if message.chat.id != ADMIN_CHAT_ID:
+    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
+    return
+
+  parts = message.text.split()
+  if len(parts) < 3:
+    bot.reply_to(
+        message,
+        "[-] সঠিক ফরম্যাট দিন: `/add <chat_id> <amount>`\nউদাহরণ: `/add"
+        " 8087857994 50`",
+        parse_mode="Markdown",
+    )
+    return
+
+  try:
+    target_uid = int(parts[1])
+    amount = int(parts[2])
+
+    if target_uid in user_credits:
+      user_credits[target_uid] += amount
+    else:
+      user_credits[target_uid] = amount
+
+    bot.reply_to(
+        message,
+        f"✅ সফলভাবে ইউজার `{target_uid}`-কে `{amount}` ক্রেডিট দেওয়া"
+        f" হয়েছে।\nবর্তমান ব্যালেন্স: `{user_credits[target_uid]}` ক্রেডিট।",
+        parse_mode="Markdown",
+    )
+
+    try:
+      bot.send_message(
+          target_uid,
+          f"🎉 **অভিনন্দন!** অ্যাডমিন আপনার অ্যাকাউন্টে `{amount}` ক্রেডিট"
+          f" রিচার্জ করেছেন।\nআপনার বর্তমান মোট ক্রেডিট: `{user_credits[target_uid]}`"
+          " টি।",
+          parse_mode="Markdown",
+      )
+    except:
+      pass
+
+  except ValueError:
+    bot.reply_to(message, "[-] চ্যাট আইডি এবং পরিমাণ অবশ্যই সংখ্যায় হতে হবে!")
+
+
+# ── অ্যাডমিন কমান্ড: ইউজার লিস্ট দেখার জন্য ──
 @bot.message_handler(commands=["user"])
 def admin_user_stats(message):
   if message.chat.id != ADMIN_CHAT_ID:
     bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
     return
 
-  if not active_users_stats:
-    bot.reply_to(message, "📊 এই মুহূর্তে কোনো ইউজার বম্বিং করেনি।")
+  if not user_credits:
+    bot.reply_to(message, "📊 এই মুহূর্তে কোনো ইউজারের ক্রেডিট রেকর্ড নেই।")
     return
 
   stats_text = (
-      "👑 **Oustad Admin Panel - Active Users List** 👑\n\n"
-      f"👥 মোট ইউনিক ইউজার: `{len(active_users_stats)}` জন\n\n"
+      "👑 **Oustad Admin Panel - User Credits List** 👑\n\n"
+      f"👥 মোট ইউজার: `{len(user_credits)}` জন\n\n"
   )
 
-  # সিনট্যাক্স ঠিক করা হয়েছে (= ব্যবহার করে)
-  for idx, (uid, hits) in enumerate(active_users_stats.items(), 1):
-    stats_text += f"{idx}. Chat ID: `{uid}` | Total Hits: `{hits}` বার\n"
+  for idx, (uid, creds) in enumerate(user_credits.items(), 1):
+    stats_text += f"{idx}. Chat ID: `{uid}` | Credit: `{creds}` টি\n"
 
   bot.send_message(message.chat.id, stats_text, parse_mode="Markdown")
 
@@ -281,9 +340,14 @@ def get_reply_keyboard():
 
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
+  chat_id = message.chat.id
+  if chat_id not in user_credits:
+    user_credits[chat_id] = 0
+
   welcome_text = (
-      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের ফিক্সড কিবোর্ড"
-      " থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
+      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n💳 আপনার বর্তমান ক্রেডিট:"
+      f" `{user_credits[chat_id]}` টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার"
+      " প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
   )
   bot.send_message(
       message.chat.id,
@@ -299,21 +363,24 @@ def handle_text_buttons(message):
   text = message.text
 
   if text == "🚀 Start Bombing":
+    current_bal = user_credits.get(chat_id, 0)
     msg = bot.send_message(
         chat_id,
-        "📱 অনুগ্রহ করে টার্গেট মোবাইল নম্বরটি দিন (যেমন: `013XXXXXXXX`):",
+        f"💳 আপনার বর্তমান ক্রেডিট: `{current_bal}` টি\n\n📱 অনুগ্রহ করে টার্গেট"
+        " মোবাইল নম্বরটি দিন (যেমন: `013XXXXXXXX`):",
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
     bot.register_next_step_handler(msg, process_mobile_step)
 
   elif text == "📊 Bot Status":
+    current_bal = user_credits.get(chat_id, 0)
     bot.send_message(
         chat_id,
         (
-            "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** Arogga,"
-            " Grameenphone, Bdtickets, Shopz, Ghorerbazar\n⚡ **Speed:** High"
-            " Performance"
+            f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
+            f" `{current_bal}` টি\n🚀 **APIs Loaded:** Arogga, Grameenphone,"
+            " Bdtickets, Shopz, Ghorerbazar\n⚡ **Speed:** High Performance"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -323,7 +390,9 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
-        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন।",
+        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
+        " বম্বিং শুরু করলে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\nক্রেডিট রিচার্জ"
+        " করতে অ্যাডমিনের সাথে যোগাযোগ করুন।",
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
@@ -332,8 +401,8 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:** WQ SMS Owner (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Hosted on:** None"
+            "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            " **Hosted on:** Render & GitHub"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -353,7 +422,7 @@ def process_mobile_step(message):
   msg = bot.send_message(
       message.chat.id,
       f"✅ টার্গেট নম্বর: `{target_mobile}`\n\n🔢 এবার কতগুলো মেসেজ পাঠাতে চান তা"
-      " সংখ্যায় লিখুন (যেমন: `10`):",
+      " সংখ্যায় লিখুন (যেমন: `10` বা `50`):",
       reply_markup=get_reply_keyboard(),
       parse_mode="Markdown",
   )
@@ -363,12 +432,6 @@ def process_mobile_step(message):
 def process_count_step(message, target_mobile):
   try:
     count = int(message.text.strip())
-    bot.send_message(
-        message.chat.id,
-        f"🚀 টাস্ক রিসিভড!\nTarget: `{target_mobile}`\nCount: `{count}`",
-        reply_markup=get_reply_keyboard(),
-        parse_mode="Markdown",
-    )
     b = Bomber(target_mobile, count, message.chat.id)
     threading.Thread(target=b.start).start()
   except ValueError:
