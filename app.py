@@ -7,9 +7,15 @@ import requests
 import telebot
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
-# আপনার দেওয়া টেলিগ্রাম বট টোকেন (এখানে কোনো GitHub টোকেন নেই)
+# আপনার দেওয়া টেলিগ্রাম বট টোকেন
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
 bot = telebot.TeleBot(TOKEN)
+
+# ── আপনার অ্যাডমিন চ্যাট আইডি এখানে বসিয়ে দিন ──
+ADMIN_CHAT_ID = 8087857994  # <--- এখানে আপনার রিয়েল টেলিগ্রাম চ্যাট আইডি দিন
+
+# রিয়্যাল-টাইম ইউজার ট্র্যাকিং ডিকশনারি (কে কয়বার হিট করেছে তা জমা থাকবে)
+active_users_stats = {}
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
 app = Flask(__name__)
@@ -18,20 +24,6 @@ app = Flask(__name__)
 @app.route("/")
 def home():
   return "Oustad Bot is Live and Running!"
-
-
-# লোকাল totalbom.txt ফাইলে লগ সেভ করার ফাংশন
-def log_to_local_file(chat_id, target, count):
-  try:
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
-    log_entry = (
-        f"Chat ID: {chat_id} | Target: {target} | Count: {count} | Time:"
-        f" {current_time}\n"
-    )
-    with open("totalbom.txt", "a", encoding="utf-8") as f:
-      f.write(log_entry)
-  except Exception as e:
-    print(f"File write error: {e}")
 
 
 # ইউজার এজেন্ট পুল
@@ -124,7 +116,7 @@ class Bomber:
         "x-requested-with": "mark.via.gp",
         "authorization": (
             "Bearer"
-            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3NTMtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
+            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3MtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
         ),
     }
     phone_num = self.user_mobile
@@ -205,11 +197,11 @@ class Bomber:
     return False
 
   def start(self):
-    # বম্বিং শুরু হওয়া মাত্রই লোকাল totalbom.txt ফাইলে লগ সেভ করবে
-    threading.Thread(
-        target=log_to_local_file,
-        args=(self.chat_id, self.user_mobile, self.number_of_messege),
-    ).start()
+    # ইউজার বম্বিং শুরু করলেই কাউন্ট আপডেট হবে
+    if self.chat_id in active_users_stats:
+      active_users_stats[self.chat_id] += 1
+    else:
+      active_users_stats[self.chat_id] = 1
 
     counter = 0
     bot.send_message(
@@ -252,6 +244,29 @@ class Bomber:
         f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` সফলভাবে শেষ হয়েছে।",
         parse_mode="Markdown",
     )
+
+
+# অ্যাডমিন কমান্ড: /user
+@bot.message_handler(commands=["user"])
+def admin_user_stats(message):
+  # চেক করা যে কমান্ড দিয়েছে সে আসল অ্যাডমিন কি না
+  if message.chat.id != ADMIN_CHAT_ID:
+    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
+    return
+
+  if not active_users_stats:
+    bot.reply_to(message, "📊 এই মুহূর্তে কোনো ইউজার বম্বিং করেনি।")
+    return
+
+  stats_text = (
+      "👑 **Oustad Admin Panel - Active Users List** 👑\n\n"
+      f"👥 মোট ইউনিক ইউজার: `{len(active_users_stats)}` জন\n\n"
+  )
+
+  for idx, (uid, hits) => enumerate(active_users_stats.items(), 1):
+    stats_text += f"{idx}. Chat ID: `{uid}` | Total Hits: `{hits}` বার\n"
+
+  bot.send_message(message.chat.id, stats_text, parse_mode="Markdown")
 
 
 # ফিক্সড রিপ্লাই কিবোর্ড
@@ -318,8 +333,8 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Hosted on:** Render & GitHub"
+            "👑 **Developer:** WQ SMS Owner (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            " **Hosted on:** None b"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -339,7 +354,7 @@ def process_mobile_step(message):
   msg = bot.send_message(
       message.chat.id,
       f"✅ টার্গেট নম্বর: `{target_mobile}`\n\n🔢 এবার কতগুলো মেসেজ পাঠাতে চান তা"
-      " সংখ্যায় লিখুন (যেমন: `10`):",
+      " সংখ্যায় লিখুন যেমন: `10`):",
       reply_markup=get_reply_keyboard(),
       parse_mode="Markdown",
   )
