@@ -12,9 +12,9 @@ TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
 bot = telebot.TeleBot(TOKEN)
 
 # ── আপনার অ্যাডমিন চ্যাট আইডি এখানে বসিয়ে দিন ──
-ADMIN_CHAT_ID = 8087857994  # <--- এখানে আপনার রিয়েল টেলিগ্রাম চ্যাট আইডি দিন
+ADMIN_CHAT_ID = 8087857994  # <--- আপনার টেলিগ্রাম চ্যাট আইডি এখানে দিন
 
-# রিয়্যাল-টাইম ইউজার ট্র্যাকিং ডিকশনারি (কে কয়বার হিট করেছে তা জমা থাকবে)
+# রিয়্যাল-টাইম ইউজার ট্র্যাকিং ডিকশনারি
 active_users_stats = {}
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
@@ -116,7 +116,7 @@ class Bomber:
         "x-requested-with": "mark.via.gp",
         "authorization": (
             "Bearer"
-            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3MtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
+            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3NTMtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
         ),
     }
     phone_num = self.user_mobile
@@ -197,7 +197,6 @@ class Bomber:
     return False
 
   def start(self):
-    # ইউজার বম্বিং শুরু করলেই কাউন্ট আপডেট হবে
     if self.chat_id in active_users_stats:
       active_users_stats[self.chat_id] += 1
     else:
@@ -249,7 +248,6 @@ class Bomber:
 # অ্যাডমিন কমান্ড: /user
 @bot.message_handler(commands=["user"])
 def admin_user_stats(message):
-  # চেক করা যে কমান্ড দিয়েছে সে আসল অ্যাডমিন কি না
   if message.chat.id != ADMIN_CHAT_ID:
     bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
     return
@@ -263,7 +261,8 @@ def admin_user_stats(message):
       f"👥 মোট ইউনিক ইউজার: `{len(active_users_stats)}` জন\n\n"
   )
 
-  for idx, (uid, hits) => enumerate(active_users_stats.items(), 1):
+  # সিনট্যাক্স ঠিক করা হয়েছে (= ব্যবহার করে)
+  for idx, (uid, hits) in enumerate(active_users_stats.items(), 1):
     stats_text += f"{idx}. Chat ID: `{uid}` | Total Hits: `{hits}` বার\n"
 
   bot.send_message(message.chat.id, stats_text, parse_mode="Markdown")
@@ -334,7 +333,7 @@ def handle_text_buttons(message):
         chat_id,
         (
             "👑 **Developer:** WQ SMS Owner (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Hosted on:** None b"
+            " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -354,7 +353,7 @@ def process_mobile_step(message):
   msg = bot.send_message(
       message.chat.id,
       f"✅ টার্গেট নম্বর: `{target_mobile}`\n\n🔢 এবার কতগুলো মেসেজ পাঠাতে চান তা"
-      " সংখ্যায় লিখুন যেমন: `10`):",
+      " সংখ্যায় লিখুন (যেমন: `10`):",
       reply_markup=get_reply_keyboard(),
       parse_mode="Markdown",
   )
