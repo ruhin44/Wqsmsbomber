@@ -5,7 +5,7 @@ import time
 from flask import Flask
 import requests
 import telebot
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
 # আপনার দেওয়া টেলিগ্রাম বট টোকেন
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
@@ -13,9 +13,6 @@ bot = telebot.TeleBot(TOKEN)
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
 app = Flask(__name__)
-
-# ইউজারদের সাময়িক ডাটা ধরে রাখার জন্য ডিকশনারি (যেমন: টার্গেট নম্বর ও কাউন্ট)
-user_sessions = {}
 
 
 @app.route("/")
@@ -204,97 +201,72 @@ class Bomber:
     )
 
 
-# মূল মেনু বাটন জেনারেটর
-def get_main_keyboard():
-  keyboard = InlineKeyboardMarkup(row_width=2)
-  btn_bomb = InlineKeyboardButton(
-      "🚀 Start Bombing", callback_data="menu_bomb"
-  )
-  btn_status = InlineKeyboardButton("📊 Bot Status", callback_data="menu_status")
-  btn_help = InlineKeyboardButton("ℹ️ Help & Info", callback_data="menu_help")
-  btn_dev = InlineKeyboardButton("👑 Oustad Panel", callback_data="menu_dev")
-  keyboard.add(btn_bomb, btn_status, btn_help, btn_dev)
-  return keyboard
+# ফিক্সড রিপ্লাই কিবোর্ড (বট চ্যাট বক্সের নিচে স্টেবল থাকবে)
+def get_reply_keyboard():
+  markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+  btn_bomb = KeyboardButton("🚀 Start Bombing")
+  btn_status = KeyboardButton("📊 Bot Status")
+  btn_help = KeyboardButton("ℹ️ Help & Info")
+  btn_dev = KeyboardButton("👑 Oustad Panel")
+  markup.add(btn_bomb, btn_status, btn_help, btn_dev)
+  return markup
 
 
-# টেলিগ্রাম বট হ্যান্ডলার
+# টেলিগ্রাম বট হ্যান্ডলার (/start কমান্ড)
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
   welcome_text = (
-      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের সুন্দর ইন্টারঅ্যাক্টিভ"
-      " বাটনগুলো ব্যবহার করে খুব সহজেই বম্বিং কন্ট্রোল করুন:"
+      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের ফিক্সড কিবোর্ড"
+      " থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
   )
   bot.send_message(
       message.chat.id,
       welcome_text,
-      reply_markup=get_main_keyboard(),
+      reply_markup=get_reply_keyboard(),
       parse_mode="Markdown",
   )
 
 
-# ইনলাইন বাটন ক্লিক হ্যান্ডলার
-@bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
-  chat_id = call.message.chat.id
+# ফিক্সড বাটনে ক্লিক করলে কী কাজ করবে তা হ্যান্ডেল করা
+@bot.message_handler(func=lambda message: True)
+def handle_text_buttons(message):
+  chat_id = message.chat.id
+  text = message.text
 
-  if call.data == "menu_bomb":
+  if text == "🚀 Start Bombing":
     msg = bot.send_message(
         chat_id,
-        "📱 অনুগ্রহ করে টার্গেট মোবাইল নম্বরটি দিন (যেমন: `017xxxxxxxx`):",
+        "📱 অনুগ্রহ করে টার্গেট মোবাইল নম্বরটি দিন (যেমন: `013XXXXXXXX`):",
+        reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
     bot.register_next_step_handler(msg, process_mobile_step)
 
-  elif call.data == "menu_status":
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
-    )
-    bot.edit_message_text(
-        "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** Arogga,"
-        " Grameenphone, Bdtickets, Shopz\n⚡ **Speed:** High Performance",
+  elif text == "📊 Bot Status":
+    bot.send_message(
         chat_id,
-        call.message.message_id,
-        reply_markup=markup,
+        "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** none,"
+        " Grameenphone, not show, Shopz\n⚡ **Speed:** High Performance",
+        reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
 
-  elif call.data == "menu_help":
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
-    )
-    bot.edit_message_text(
-        "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `Start Bombing` বাটনে ক্লিক"
+  elif text == "ℹ️ Help & Info":
+    bot.send_message(
+        chat_id,
+        "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
         " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন।\n\nঅথবা"
-        " ডিরেক্ট কমান্ড দিতে পারেন:\n`/bomb <number> <count>`",
-        chat_id,
-        call.message.message_id,
-        reply_markup=markup,
+        " সরাসরি কমান্ড দিতে পারেন:\n`/bomb <number> <count>`",
+        reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
 
-  elif call.data == "menu_dev":
-    markup = InlineKeyboardMarkup()
-    markup.add(
-        InlineKeyboardButton("🔙 Main Menu", callback_data="back_home")
-    )
-    bot.edit_message_text(
-        "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-        " **Hosted on:**  & GitHub",
+  elif text == "👑 Oustad Panel":
+    bot.send_message(
         chat_id,
-        call.message.message_id,
-        reply_markup=markup,
-        parse_mode="Markdown",
-    )
-
-  elif call.data == "back_home":
-    bot.edit_message_text(
-        "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\nনিচের সুন্দর ইন্টারঅ্যাক্টিভ"
-        " বাটনগুলো ব্যবহার করে খুব সহজেই বম্বিং কন্ট্রোল করুন:",
-        chat_id,
-        call.message.message_id,
-        reply_markup=get_main_keyboard(),
+        "👑 **Developer:** WQ Owner (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+        " **Hosted on:** Privet",
+        reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
 
@@ -302,10 +274,20 @@ def callback_query(call):
 # নম্বর পাওয়ার পর কাউন্ট চাওয়ার স্টেপ
 def process_mobile_step(message):
   target_mobile = message.text.strip()
+  # যদি ইউজার হঠাৎ অন্য কোনো বাটন চাপ দেয়
+  if target_mobile in [
+      "🚀 Start Bombing",
+      "📊 Bot Status",
+      "ℹ️ Help & Info",
+      "👑 Oustad Panel",
+  ]:
+    return
+
   msg = bot.send_message(
       message.chat.id,
       f"✅ টার্গেট নম্বর: `{target_mobile}`\n\n🔢 এবার কতগুলো মেসেজ পাঠাতে চান তা"
       " সংখ্যায় লিখুন (যেমন: `10`):",
+      reply_markup=get_reply_keyboard(),
       parse_mode="Markdown",
   )
   bot.register_next_step_handler(msg, process_count_step, target_mobile)
@@ -318,6 +300,7 @@ def process_count_step(message, target_mobile):
     bot.send_message(
         message.chat.id,
         f"🚀 টাস্ক রিসিভড!\nTarget: `{target_mobile}`\nCount: `{count}`",
+        reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
     b = Bomber(target_mobile, count, message.chat.id)
@@ -325,8 +308,8 @@ def process_count_step(message, target_mobile):
   except ValueError:
     bot.send_message(
         message.chat.id,
-        "[-] ভুল সংখ্যা দিয়েছেন! দয়া করে সঠিক সংখ্যা লিখুন। প্রক্রিয়াটি"
-        " বাতিল করা হলো।",
+        "[-] ভুল সংখ্যা দিয়েছেন! দয়া করে সঠিক সংখ্যা লিখুন।",
+        reply_markup=get_reply_keyboard(),
     )
 
 
