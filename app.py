@@ -7,15 +7,16 @@ import requests
 import telebot
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
-# আপনার দেওয়া টেলিগ্রাম বট টোকেন
+# আপনার টেলিগ্রাম বট টোকেন
 TOKEN = "9170879282:AAESbi5FBohsHoVvrs4t-kblWKfULticg4s"
 bot = telebot.TeleBot(TOKEN)
 
 # ── আপনার অ্যাডমিন চ্যাট আইডি ──
 ADMIN_CHAT_ID = 8087857994
 
-# ইউজার ক্রেডিট ডাটাবেজ
-user_credits = {}
+# ডাটাবেজ (মেমোরিতে থাকবে)
+user_credits = {}  # {chat_id: credit_amount}
+user_hits = {}  # {chat_id: total_bombing_hits}
 
 # রেন্ডারের পোর্ট রিকোয়ারমেন্ট পূরণের জন্য ফ্লাস্ক ওয়েব সার্ভার
 app = Flask(__name__)
@@ -197,19 +198,23 @@ class Bomber:
     return False
 
   def start(self):
-    # চেক করা యూজারর ১ ক্রেডিট আছে কি না
     current_credits = user_credits.get(self.chat_id, 0)
     if current_credits < 1:
       bot.send_message(
           self.chat_id,
           "❌ **পর্যাপ্ত ক্রেডিট নেই!**\nবম্বিং শুরু করতে কমপক্ষে **১ ক্রেডিট**"
-          " প্রয়োজন।\nদয়া করে অ্যাডমিনের কাছ থেকে ক্রেডিট রিচার্জ করুন।",
+          " প্রয়োজন।\nদয়া করে `/refer` কমান্ড ব্যবহার করে রেফার করুন অথবা অ্যাডমিনের"
+          " কাছ থেকে ক্রেডিট রিচার্জ করুন।",
           parse_mode="Markdown",
       )
       return
 
-    # একবার হিট বা টাস্ক শুরু করার জন্য মাত্র ১ ক্রেডিট কেটে নেওয়া হচ্ছে
+    # ১ ক্রেডিট কাটা হচ্ছে এবং হিট কাউন্ট ১ বাড়নো হচ্ছে
     user_credits[self.chat_id] -= 1
+    if self.chat_id in user_hits:
+      user_hits[self.chat_id] += 1
+    else:
+      user_hits[self.chat_id] = 1
 
     counter = 0
     bot.send_message(
@@ -256,8 +261,7 @@ class Bomber:
     )
 
 
-# ── অ্যাডমিন কমান্ড: ক্রেডিট দেওয়ার জন্য ──
-# ব্যবহার: /add <chat_id> <amount>
+# ── অ্যাডমিন কমান্ড: ক্রেডিট দেওয়ার জন্য (/add <chat_id> <amount>) ──
 @bot.message_handler(commands=["add"])
 def admin_add_credit(message):
   if message.chat.id != ADMIN_CHAT_ID:
@@ -268,8 +272,7 @@ def admin_add_credit(message):
   if len(parts) < 3:
     bot.reply_to(
         message,
-        "[-] সঠিক ফরম্যাট দিন: `/add <chat_id> <amount>`\nউদাহরণ: `/add"
-        " 8087857994 50`",
+        "[-] সঠিক ফরম্যাট দিন: `/add <chat_id> <amount>`",
         parse_mode="Markdown",
     )
     return
@@ -302,10 +305,10 @@ def admin_add_credit(message):
       pass
 
   except ValueError:
-    bot.reply_to(message, "[-] চ্যাট আইডি এবং পরিমাণ অবশ্যই সংখ্যায় হতে হবে!")
+    bot.reply_to(message, "[-] চ্যাট আইডি এবং পরিমাণ সংখ্যায় হতে হবে!")
 
 
-# ── অ্যাডমিন কমান্ড: ইউজার লিস্ট দেখার জন্য ──
+# ── অ্যাডমিন কমান্ড: ইউজার লিস্ট, ক্রেডিট ও হিট দেখার জন্য (/user) ──
 @bot.message_handler(commands=["user"])
 def admin_user_stats(message):
   if message.chat.id != ADMIN_CHAT_ID:
@@ -313,18 +316,38 @@ def admin_user_stats(message):
     return
 
   if not user_credits:
-    bot.reply_to(message, "📊 এই মুহূর্তে কোনো ইউজারের ক্রেডিট রেকর্ড নেই।")
+    bot.reply_to(message, "📊 এই মুহূর্তে কোনো ইউজারের ডাটা নেই।")
     return
 
   stats_text = (
-      "👑 **Oustad Admin Panel - User Credits List** 👑\n\n"
+      "👑 **Oustad Admin Panel - User List & Stats** 👑\n\n"
       f"👥 মোট ইউজার: `{len(user_credits)}` জন\n\n"
   )
 
   for idx, (uid, creds) in enumerate(user_credits.items(), 1):
-    stats_text += f"{idx}. Chat ID: `{uid}` | Credit: `{creds}` টি\n"
+    hits = user_hits.get(uid, 0)
+    stats_text += (
+        f"{idx}. Chat ID: `{uid}` | Credit: `{creds}` টি | Total Hits: `{hits}`"
+        " বার\n"
+    )
 
   bot.send_message(message.chat.id, stats_text, parse_mode="Markdown")
+
+
+# ── রেফারেল লিংক পাওয়ার কমান্ড (/refer) ──
+@bot.message_handler(commands=["refer"])
+def refer_command(message):
+  chat_id = message.chat.id
+  bot_info = bot.get_me()
+  bot_username = bot_info.username
+  refer_link = f"https://t.me/{bot_username}?start={chat_id}"
+
+  text = (
+      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! প্রতি"
+      " সফল রেফারে আপনি পাবেন **১ ক্রেডিট** করে ফ্রি।\n\n🔗 আপনার রেফারেল"
+      f" লিংক:\n`{refer_link}`"
+  )
+  bot.send_message(message.chat.id, text, parse_mode="Markdown")
 
 
 # ফিক্সড রিপ্লাই কিবোর্ড
@@ -341,13 +364,33 @@ def get_reply_keyboard():
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
   chat_id = message.chat.id
+  args = message.text.split()
+
+  # নতুন ইউজার হলে সাইন-আপ বোনাস ২ ক্রেডিট দেওয়া
   if chat_id not in user_credits:
-    user_credits[chat_id] = 0
+    user_credits[chat_id] = 2  # নতুনদের জন্য ২ ক্রেডিট ফ্রি
+    if chat_id not in user_hits:
+      user_hits[chat_id] = 0
+
+    # রেফারেল চেক (যদি কেউ রেফার লিংক থেকে জয়েন করে)
+    if len(args) > 1:
+      try:
+        referrer_id = int(args[1])
+        if referrer_id != chat_id and referrer_id in user_credits:
+          user_credits[referrer_id] += 1  # রেফারাকে ১ ক্রেডিট বোনাস
+          bot.send_message(
+              referrer_id,
+              "🎉 **অভিনন্দন!** আপনার রেফারেল লিংকের মাধ্যমে একজন নতুন ইউজার"
+              " জয়েন করেছে। আপনি **১ ক্রেডিট** বোনাস পেয়েছেন!",
+              parse_mode="Markdown",
+          )
+      except ValueError:
+        pass
 
   welcome_text = (
-      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n💳 আপনার বর্তমান ক্রেডিট:"
-      f" `{user_credits[chat_id]}` টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার"
-      " প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
+      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n🎁 নতুন জয়েনিং বোনাস:"
+      f" **২ ক্রেডিট ফ্রি!**\n💳 আপনার বর্তমান ক্রেডিট: `{user_credits[chat_id]}`"
+      " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
   )
   bot.send_message(
       message.chat.id,
@@ -375,12 +418,14 @@ def handle_text_buttons(message):
 
   elif text == "📊 Bot Status":
     current_bal = user_credits.get(chat_id, 0)
+    hits = user_hits.get(chat_id, 0)
     bot.send_message(
         chat_id,
         (
             f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
-            f" `{current_bal}` টি\n🚀 **APIs Loaded:** Arogga, Grameenphone,"
-            " Bdtickets, Shopz, Ghorerbazar\n⚡ **Speed:** High Performance"
+            f" `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀"
+            " **APIs Loaded:** Arogga, Grameenphone, Bdtickets, Shopz,"
+            " Ghorerbazar\n⚡ **Speed:** High Performance"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -389,10 +434,12 @@ def handle_text_buttons(message):
   elif text == "ℹ️ Help & Info":
     bot.send_message(
         chat_id,
-        "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
-        " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
-        " বম্বিং শুরু করলে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\nক্রেডিট রিচার্জ"
-        " করতে অ্যাডমিনের সাথে যোগাযোগ করুন।",
+        (
+            "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
+            " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
+            " বম্বিংয়ে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\n🎁 ফ্রি ক্রেডিট পেতে"
+            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন!"
+        ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
     )
@@ -401,8 +448,8 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:** Ruhin Ahmed (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Hosted on:** Render & GitHub"
+            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
