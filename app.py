@@ -188,7 +188,7 @@ class Bomber:
           self.chat_id,
           "❌ **পর্যাপ্ত ক্রেডিট নেই!**\nবম্বিং শুরু করতে কমপক্ষে **১ ক্রেডিট**"
           " প্রয়োজন।\nদয়া করে `/refer` কমান্ড ব্যবহার করে রেফার করুন অথবা অ্যাডমিনের"
-          " কাছ থেকে ক্রেডিট রিচার্জ করুন।",
+          " কাছ থেকে ক্রেডিট রিচার্জ করুন। (কন্টাক্ট)@wqtarik",
           parse_mode="Markdown",
       )
       return
@@ -253,7 +253,7 @@ class Bomber:
 @bot.message_handler(commands=["add"])
 def admin_add_credit(message):
   if message.chat.id != ADMIN_CHAT_ID:
-    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
+    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই! @wqtarik")
     return
 
   parts = message.text.split()
@@ -300,7 +300,7 @@ def admin_add_credit(message):
 @bot.message_handler(commands=["user"])
 def admin_user_stats(message):
   if message.chat.id != ADMIN_CHAT_ID:
-    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই!")
+    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই! @wqtarik")
     return
 
   if not user_credits:
@@ -331,7 +331,7 @@ def refer_command(message):
   refer_link = f"https://t.me/{bot_username}?start={chat_id}"
 
   text = (
-      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! প্রতি"
+      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! অতবা cardit নেয়ার জন্য @wqtarik ি"
       " সফল রেফারে আপনি পাবেন **১ ক্রেডিট** করে ফ্রি।\n\n🔗 আপনার রেফারেল"
       f" লিংক:\n`{refer_link}`"
   )
@@ -436,7 +436,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER @wqtarik (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
