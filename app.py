@@ -344,7 +344,7 @@ def get_reply_keyboard():
   btn_bomb = KeyboardButton("🚀 Start Bombing")
   btn_status = KeyboardButton("📊 Bot Status")
   btn_help = KeyboardButton("ℹ️ Help & Info")
-  btn_dev = KeyboardButton("👑 Oustad Panel")
+  btn_dev = KeyboardButton("👑 Admin Info")
   markup.add(btn_bomb, btn_status, btn_help, btn_dev)
   return markup
 
@@ -378,7 +378,7 @@ def send_welcome(message):
   welcome_text = (
       "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n🎁 নতুন জয়েনিং বোনাস:"
       f" **২ ক্রেডিট ফ্রি!**\n💳 আপনার বর্তমান ক্রেডিট: `{user_credits[chat_id]}`"
-      " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন:"
+      " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন credit পেতে কনটাক্ট করোন @wqtarik :"
   )
   bot.send_message(
       message.chat.id,
@@ -413,7 +413,7 @@ def handle_text_buttons(message):
             f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
             f" `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀"
             " **APIs Loaded:** Arogga, Grameenphone, Bdtickets, Shopz,"
-            " Ghorerbazar\n⚡ **Speed:** High Performance"
+            " Ghorerbazar\n⚡ **Speed:** High Performance এডমিন সাতে কনট্যাক্ট করোন @wqtarik"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -426,7 +426,7 @@ def handle_text_buttons(message):
             "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
             " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
             " বম্বিংয়ে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\n🎁 ফ্রি ক্রেডিট পেতে"
-            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন!"
+            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন! অতবা cardit নিতে কন্টাক্ট করোন @wqtarik"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
