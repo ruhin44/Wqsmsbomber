@@ -1,3 +1,5 @@
+
+
 import os
 import random
 import threading
@@ -188,7 +190,7 @@ class Bomber:
           self.chat_id,
           "❌ **পর্যাপ্ত ক্রেডিট নেই!**\nবম্বিং শুরু করতে কমপক্ষে **১ ক্রেডিট**"
           " প্রয়োজন।\nদয়া করে `/refer` কমান্ড ব্যবহার করে রেফার করুন অথবা অ্যাডমিনের"
-          " কাছ থেকে ক্রেডিট রিচার্জ করুন। (কন্টাক্ট)@wqtarik",
+          " কাছ থেকে ক্রেডিট রিচার্জ করুন। (কন্টাক্ট)@wqtarik এন্ড সকল আপডেট পেতে আমাদের অফিসিয়াল চ্যানেল এ জয়েন হোন https://t.me/WQchanneloft",
           parse_mode="Markdown",
       )
       return
@@ -244,7 +246,7 @@ class Bomber:
 
     bot.send_message(
         self.chat_id,
-        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` সফলভাবে শেষ হয়েছে।",
+        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` সফলভাবে শেষ হয়েছে। সকল আপডেট পেতে আমাদের চ্যানেলে জয়েন হন https://t.me/WQchanneloft",
         parse_mode="Markdown",
     )
 
@@ -331,7 +333,7 @@ def refer_command(message):
   refer_link = f"https://t.me/{bot_username}?start={chat_id}"
 
   text = (
-      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! অতবা cardit নেয়ার জন্য @wqtarik ি"
+      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! অতবা cardit নেয়ার জন্য @wqtarik ি এন্ড সকল আপডেট পেতে আমাদের চ্যানেলে জয়েন হন ়https://t.me/WQchanneloft"
       " সফল রেফারে আপনি পাবেন **১ ক্রেডিট** করে ফ্রি।\n\n🔗 আপনার রেফারেল"
       f" লিংক:\n`{refer_link}`"
   )
@@ -344,7 +346,7 @@ def get_reply_keyboard():
   btn_bomb = KeyboardButton("🚀 Start Bombing")
   btn_status = KeyboardButton("📊 Bot Status")
   btn_help = KeyboardButton("ℹ️ Help & Info")
-  btn_dev = KeyboardButton("👑 Admin Info")
+  btn_dev = KeyboardButton("👑 Oustad Panel")
   markup.add(btn_bomb, btn_status, btn_help, btn_dev)
   return markup
 
@@ -378,7 +380,7 @@ def send_welcome(message):
   welcome_text = (
       "🔥 *স্বাগতম ওস্তাদ! WQ SMS BOMBER প্যানেলে.*\n\n🎁 নতুন জয়েনিং বোনাস:"
       f" **২ ক্রেডিট ফ্রি!**\n💳 আপনার বর্তমান ক্রেডিট: `{user_credits[chat_id]}`"
-      " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন credit পেতে কনটাক্ট করোন @wqtarik :"
+      " টি\n\nনিচের ফিক্সড কিবোর্ড থেকে আপনার প্রয়োজনীয় অপশনটি সিলেক্ট করুন credit পেতে কনটাক্ট করোন @wqtarik  এন্ড সকল প্রকার আপডেট পেতে আমাদের চ্যানেলে জয়েন হোন https://t.me/WQchanneloft :"
   )
   bot.send_message(
       message.chat.id,
@@ -413,7 +415,7 @@ def handle_text_buttons(message):
             f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
             f" `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀"
             " **APIs Loaded:** Arogga, Grameenphone, Bdtickets, Shopz,"
-            " Ghorerbazar\n⚡ **Speed:** High Performance এডমিন সাতে কনট্যাক্ট করোন @wqtarik"
+            " Ghorerbazar\n⚡ **Speed:** High Performance এডমিন সাতে কনট্যাক্ট করোন @wqtarik এন্ড আমাদের অফিসিয়াল চ্যানেলে, জয়েন করুন https://t.me/WQchanneloft"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -426,7 +428,7 @@ def handle_text_buttons(message):
             "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
             " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
             " বম্বিংয়ে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\n🎁 ফ্রি ক্রেডিট পেতে"
-            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন! অতবা cardit নিতে কন্টাক্ট করোন @wqtarik"
+            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন! অতবা cardit নিতে কন্টাক্ট করোন @wqtarik এন্ড সকল প্রকার আপডেট পেতে আমাদের চ্যানেলে জয়েন করুন https://t.me/WQchanneloft"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -436,7 +438,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER @wqtarik (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            "👑 **Developer:**WQ OWNER @wqtarik (ওস্তাদ)\n⚡ **Brand:** https://t.me/WQchanneloft\n🌐"
             " **Hosted on:** None"
         ),
         reply_markup=get_reply_keyboard(),
