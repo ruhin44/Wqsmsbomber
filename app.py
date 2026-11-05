@@ -402,7 +402,7 @@ def send_channel_join_required(chat_id):
 
   text = (
       "⚠️ **বট ব্যবহার করতে হলে অবশ্যই আমাদের অফিসিয়াল চ্যানেলে জয়েন করতে হবে!**\n\n"
-      "১. প্রথমে নিচে `📢 Join Channel` বাটনে ক্লিক করে আমাদের চ্যানেলে জয়েন করুন.\n"
+      "১. প্রথমে নিচে `📢 Join Channel` বাটনে ক্লিক করে আমাদের চ্যানেলে জয়েন করুন.সমস্যা হলে কন্টাক্ট করুন@wqtarik সাতে \n"
       "২. এরপর `✅ Joined & Verify` বাটনে ক্লিক করে ভেরিফাই করুন."
   )
   bot.send_message(chat_id, text, reply_markup=markup, parse_mode="Markdown")
@@ -510,7 +510,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:** `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀 **APIs Loaded:** Arogga, Grameenphone, Bdtickets, Vision, Soho, Patakuribd\n⚡ **Speed:** High Performance"
+            f"🟢 **Bot Status:** Online & Active\n💳 **Your Credits:** `{current_bal}` টি\n⚡ **Your Total Hits:** `{hits}` বার\n🚀 **APIs Loaded:** none, Patakuribd\n⚡ **Speed:** High Performance"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
@@ -557,7 +557,7 @@ def handle_text_buttons(message):
     bot.send_message(
         chat_id,
         (
-            "👑 **Developer:** WQ OWNER @wqtarik (ওস্তাদ)\n⚡ **Brand:** https://t.me/WQchanneloft\n🌐 **Hosted on:** Render"
+            "👑 **Developer:** WQ OWNER @wqtarik (ওস্তাদ)\n⚡ **Brand:** https://t.me/WQchanneloft\n🌐 **Hosted on:**none"
         ),
         reply_markup=get_reply_keyboard(),
         parse_mode="Markdown",
