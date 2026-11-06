@@ -384,9 +384,14 @@ def admin_broadcast_note(message):
 
   status_msg = bot.reply_to(message, "📤 **ব্রডকাস্ট মেসেজ পাঠানো শুরু হয়েছে...**", parse_mode="Markdown")
 
+  # সব ইউনিক ইউজারের আইডি সংগ্রহ করা
   all_users = set(list(user_credits.keys()) + list(user_hits.keys()))
 
   for uid in all_users:
+    # অ্যাডমিন বা নিজের আইডিতে ব্রডকাস্ট মেসেজ পাঠানোর চেষ্টা করবে না
+    if uid == ADMIN_CHAT_ID:
+      continue
+
     try:
       bot.send_message(
           uid,
@@ -394,8 +399,9 @@ def admin_broadcast_note(message):
           parse_mode="Markdown",
       )
       success_count += 1
-      time.sleep(0.3)
+      time.sleep(0.3)  # টেলিগ্রাম ফ্লাড লিমিট এড়াতে ছোট বিরতি
     except Exception as e:
+      print(f"Broadcast failed for {uid}: {e}")
       fail_count += 1
 
   bot.edit_message_text(
