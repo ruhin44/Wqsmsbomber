@@ -374,22 +374,34 @@ def refer_command(message):
   bot_username = bot_info.username
   refer_link = f"https://t.me/{bot_username}?start={chat_id}"
 
+  # 👇 এখানে কোটেশনের আগে 'f' দেওয়া হয়েছে এবং ব্র্যাকেটের ভেতরের ভেরিয়েবল কাজ করবে
   text = (
-      "👥 **Refer & Earn Program** 👥\n\nআপনার বন্ধুদের এই বটে রেফার করুন! অতবা cardit নেয়ার জন্য @wqtarik ি এন্ড সকল আপডেট পেতে আমাদের চ্যানেলে জয়েন হন ়https://t.me/WQchanneloft সফল রেফারে আপনি পাবেন **১ ক্রেডিট** করে ফ্রি।\n\n🔗 আপনার রেফারেল লিংক:\n`{refer_link}`"
+      "👥 **Refer & Earn Program** 👥\n\n"
+      "আপনার বন্ধুদের এই বটে রেফার করুন! ক্রেডিট নেওয়ার জন্য @wqtarik এবং সকল আপডেট পেতে আমাদের চ্যানেলে জয়েন হন https://t.me/WQchanneloft\n\n"
+      "সফল রেফারে আপনি পাবেন **১ ক্রেডিট** করে ফ্রি।\n\n"
+      "🔗 আপনার রেফারেল লিংক:\n"
+      f"`{refer_link}`"
   )
   bot.send_message(message.chat.id, text, parse_mode="Markdown")
 
 
-# ফিক্সড রিপ্লাই কিবোর্ড (নতুন আপডেট বাটনসহ)
+
+
+
+# ── ফিক্সড রিপ্লাই কিবোর্ড (নতুন আপডেট এবং রেফার বাটনসহ) ──
 def get_reply_keyboard():
   markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
   btn_bomb = KeyboardButton("🚀 Start Bombing")
   btn_status = KeyboardButton("📊 Bot Status")
   btn_help = KeyboardButton("ℹ️ Help & Info")
   btn_update = KeyboardButton("🔄 বট আপডেট করুন")
+  btn_refer = KeyboardButton("🎁 refer করে ক্রেডিট নিন")  # <--- নতুন বাটন
   btn_dev = KeyboardButton("👑 Oustad Panel")
-  markup.add(btn_bomb, btn_status, btn_help, btn_update, btn_dev)
+  
+  # কিবোর্ডে বাটনগুলো সুন্দরভাবে সাজিয়ে দেওয়া হলো
+  markup.add(btn_bomb, btn_status, btn_help, btn_update, btn_refer, btn_dev)
   return markup
+
 
 
 # চ্যানেল জয়েন না করলে যে মেসেজ ও বাটন দেখাবে
