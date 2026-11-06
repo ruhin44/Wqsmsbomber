@@ -565,6 +565,11 @@ def handle_text_buttons(message):
     # ১০০% হওয়ার পর অটোমেটিক /start কমান্ডের মতো ওয়েলকাম মেনু রিলোড করে দেওয়া
     send_welcome(message)
 
+  # ── 👇 এই অংশটুকু যুক্ত করা হলো ──
+  elif text == "🎁 refer করে ক্রেডিট নিন":
+    refer_command(message)
+  # ── 👆 যুক্ত করা শেষ ──
+
   elif text == "👑 Oustad Panel":
     bot.send_message(
         chat_id,
@@ -583,6 +588,7 @@ def process_mobile_step(message):
       "📊 Bot Status",
       "ℹ️ Help & Info",
       "🔄 বট আপডেট করুন",
+      "🎁 refer করে ক্রেডিট নিন",  # ── 👇 এখানেও বাটন নাম যোগ করা হলো ──
       "👑 Oustad Panel",
   ]:
     return
@@ -594,6 +600,7 @@ def process_mobile_step(message):
       parse_mode="Markdown",
   )
   bot.register_next_step_handler(msg, process_count_step, target_mobile)
+
 
 
 def process_count_step(message, target_mobile):
