@@ -361,6 +361,63 @@ def admin_user_stats(message):
   bot.send_message(message.chat.id, stats_text, parse_mode="Markdown")
 
 
+# ── অ্যাডমিন কমান্ড: সব ইউজারের কাছে নোটিশ পাঠানোর জন্য (/note <message>) ──
+@bot.message_handler(commands=["note"])
+def admin_broadcast_note(message):
+  if message.chat.id != ADMIN_CHAT_ID:
+    bot.reply_to(message, "❌ আপনার এই কমান্ডটি ব্যবহার করার অনুমতি নেই! @wqtarik")
+    return
+
+  parts = message.text.split(maxsplit=1)
+  if len(parts) < 2:
+    bot.reply_to(
+        message,
+        "[-] সঠিক ফরম্যাট দিন: `/note <আপনার মেসেজ>`",
+        parse_mode="Markdown",
+    )
+    return
+
+  broadcast_msg = parts[1]
+  
+  success_count = 0
+  fail_count = 0
+
+  status_msg = bot.reply_to(message, "📤 **ব্রডকাস্ট মেসেজ পাঠানো শুরু হয়েছে...**", parse_mode="Markdown")
+
+  all_users = set(list(user_credits.keys()) + list(user_hits.keys()))
+
+  for uid in all_users:
+    try:
+      bot.send_message(
+          uid,
+          f"📢 **অ্যাডমিন নোটিশ / আপডেট:**\n\n{broadcast_msg}",
+          parse_mode="Markdown",
+      )
+      success_count += 1
+      time.sleep(0.3)
+    except Exception as e:
+      fail_count += 1
+
+  bot.edit_message_text(
+      f"✅ **ব্রডকাস্ট সম্পন্ন!**\n\n"
+      f"👥 সফলভাবে পাঠানো হয়েছে: `{success_count}` জনের কাছে\n"
+      f"❌ ফেইল হয়েছে: `{fail_count}` জনের কাছে",
+      chat_id=message.chat.id,
+      message_id=status_msg.message_id,
+      parse_mode="Markdown"
+  )
+
+
+
+
+
+
+
+
+
+
+
+
 # ── রেফারেল লিংক পাওয়ার কমান্ড (/refer) ──
 @bot.message_handler(commands=["refer"])
 def refer_command(message):
